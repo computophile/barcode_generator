@@ -1,12 +1,70 @@
 import tkinter as tk
 from tkinter import messagebox as tkinterMessage
-
+from tkinter import filedialog
 import barcode
+from barcode.writer import ImageWriter
+from PIL import *
+
+def check_errors():
+    """
+    Purpose: to check for errors in the input in the entry field
+
+    Pre-Conditions:
+
+    Post-Conditions:
+
+    Return:
+    :return: true or false
+    """
+    start = barcodeBeginningNumber.get()
+    end = barcodeEndingNumber.get()
+
+    if end < start:
+        tkinterMessage.showerror("Input Error", "Please Input the Right Ending Sequence")
+        return False
+    else:
+        return True
 
 def generate_barcode():
     print("Generated Barcode")
+    start = barcodeBeginningNumber.get()
+    end = barcodeEndingNumber.get()
+    prefix = barcodePrefixVar.get()
+    suffix = barcodeSuffixVar.get()
 
-print(barcode)
+
+    print("Start , End, Prefix, Suffix", start, end, prefix, suffix)
+
+    if check_errors():
+        try:
+            save_in = filedialog.askdirectory()
+        except:
+            tkinterMessage.showerror("Wrong Directory", "Chose the Correct Directory")
+            save_in = filedialog.askdirectory()
+        print(save_in , type(save_in))
+        # barcode.PROVIDED_BARCODES
+        # [u'code39', u'code128', u'ean', u'ean13', u'ean8', u'gs1', u'gtin',
+        #  u'isbn', u'isbn10', u'isbn13', u'issn', u'jan', u'pzn', u'upc', u'upca']
+
+        # all the possible barcodes provided by the class
+        # print(barcode.PROVIDED_BARCODES)
+        # ['code128', 'code39', 'ean', 'ean13', 'ean14', 'ean8', 'gs1', 'gtin',
+        #  'isbn', 'isbn10', 'isbn13', 'issn', 'itf', 'jan', 'pzn', 'upc', 'upca']
+
+        if type(save_in) == str and save_in != ():
+            CODE128 = barcode.get_barcode_class('code128')
+            print('condition passed')
+            for i in range(start, end + 1):
+
+                codeFor = prefix +  str(i) + suffix
+                try:
+                    code128 = CODE128(codeFor, writer=ImageWriter())
+                    fullname = code128.save(save_in + '/barcode' + str(i))
+                    print(fullname)
+                except PermissionError:
+                    tkinterMessage.showerror("Permission Denied", "Not Enough Permission to Write the Files")
+                    return
+
 
 app = tk.Tk()
 
